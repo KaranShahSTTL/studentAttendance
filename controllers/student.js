@@ -15,7 +15,7 @@ class Students {
             if (err) {
                 let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.FAIL, 'Student already registered', (err));
                 return res.send(data);
-               
+
             } else {
                 student.hash_password = undefined;
                 let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, 'Student registered', (student));
@@ -82,7 +82,7 @@ class Students {
         ]).then((result) => {
 
             if (result.length > 0) {
-        
+
                 Attendance.findOneAndUpdate({ _id: result[0]._id }, { CheckOutTime: new Date(), Flag: true }, { new: true }).then((result) => {
                     let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, '', result);
                     return res.send(data);
@@ -114,7 +114,49 @@ class Students {
 
     })
 
+    static monthSummary = asyncWrapper(async (req, res) => {
 
+        const studentId = req.params.studentId;
+        const date = new Date();
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 2);
+
+        console.log('firstDay', firstDay)
+        console.log('lastDay', lastDay)
+        Attendance.aggregate([
+            {
+                $match: {
+                    studentId: mongoose.Types.ObjectId(studentId),
+                    CheckInTime: {
+                        $gt: firstDay,
+                        $lte: lastDay,
+                    }
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$CheckInTime",
+                        },
+                    },
+                    // total: { $sum: 1 },
+                    CheckInTime: { $first: "$CheckInTime" },
+                    CheckOutTime: { $first: "$CheckOutTime" },
+                    Present: { $sum: { $cond: [{ $eq: ["$Flag", true] }, 1, 0] } },
+                },
+            },
+
+        ]).then((result) => {
+            let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, '', result);
+            return res.send(data);
+        }).catch((err) => {
+            let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.ERROR, err, '');
+            return res.send(data);
+        })
+    }
+    )
 
 }
 
