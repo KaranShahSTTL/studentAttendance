@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post('/register', Students.register);
 router.post('/sign_in', Students.sign_in);
+router.post('/leaveApplication', Students.leaveApplication);
 router.get('/checkInOut/:studentId', Students.checkInOut);
 router.get('/monthSummary/:studentId', Students.monthSummary);
 

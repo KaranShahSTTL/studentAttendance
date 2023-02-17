@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import Student from "../models/Student.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import LeaveApplication from "../models/LeaveApplication.js";
 
 class Students {
     static register = asyncWrapper(async (req, res) => {
@@ -157,6 +158,27 @@ class Students {
         })
     }
     )
+
+    static leaveApplication = asyncWrapper(async (req, res) => {
+        const leaveApplication = new LeaveApplication({
+            studentId: req.body.studentId,
+            leaveType: req.body.leaveType,
+            leaveFrom: req.body.leaveFrom,
+            leaveTo: req.body.leaveTo,
+            reason: req.body.reason,
+            status: "Pending",
+
+        })
+        console.log('leaveApplication', leaveApplication)
+        try {
+            leaveApplication.save();
+            let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, '', leaveApplication);
+            return res.send(data);
+        } catch (err) {
+            let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.FAIL, err);
+            return res.send(data);
+        }
+    })
 
 }
 
