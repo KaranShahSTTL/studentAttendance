@@ -180,6 +180,23 @@ class Students {
         }
     })
 
+    static leaveApplicationById = asyncWrapper(async (req, res) => {
+        const studentId = req.params.studentId;
+        LeaveApplication.aggregate([
+            {
+                $match: {
+                    studentId: mongoose.Types.ObjectId(studentId),
+                },
+            },
+        ]).then((result) => {
+            let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, '', result);
+            return res.send(data);
+        }).catch((err) => {
+            let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.ERROR, err, '');
+            return res.send(data);
+        })
+    })
+
 }
 
 export default Students;
