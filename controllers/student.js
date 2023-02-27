@@ -31,7 +31,8 @@ class Students {
         }, function (err, user) {
             if (err) throw err;
             if (!user || !user.comparePassword(req.body.Password)) {
-                return res.status(401).json({ message: 'Authentication failed. Invalid user or password.' });
+                let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.FAIL, 'Authentication failed. Invalid user or password.', (err));
+                return res.send(data);
             }
             const updates = {};
             updates["Token"] = jwt.sign({ Email: user.Email, Name: user.Name, _id: user._id, Status: user.Status }, 'RESTFULAPIs', {

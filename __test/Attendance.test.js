@@ -3,7 +3,7 @@ const request = require("supertest");
 const app = require("../app");
 
 beforeEach(async () => {
-  await mongoose.connect("mongodb://localhost:27017/testingggg");
+  await mongoose.connect("mongodb://localhost:27017/attendanceTestCase");
 });
 
 // // /* Dropping the database and closing connection after each test. */
@@ -14,28 +14,90 @@ afterEach(async () => {
 
 describe("Student Test case", () => {
 
-  it("Check IN Out ", async () => {
-    const res = await request(app).get("/student/checkInOut/63edf5c63fc34460ceefe1c5");
-   console.log('res.body inout', res.body)
-    expect(res.statusCode).toBe(200);
-  });
-
-  it("register student ", async () => {
-    //test case for register student
-    const res = await request(app).post("/student/register").send(
-      {
-        "Name": "test Bhai",
-        "Email": "test132@gmail.com",
-        "Gender": "Male",
-        "DOB": "1999-11-25",
-        "password": "Admin@123"
-      }
-    );
-    console.log('res.body', res.body)
-    expect(res.statusCode).toBe(200);
-    
-
-
-
+  describe("Check IN Out", () => {
+    it("Check IN Out ", async () => {
+      const response = await request(app).get("/student/checkInOut/63edf5c63fc34460ceefe1c5");
+      expect(response.statusCode).toBe(200);
     });
   });
+
+
+  describe("register student", () => {
+    it("register student ", async () => {
+      //test case for register student
+      const response = await request(app).post("/student/register").send(
+        {
+          "Name": "test Bhai",
+          "Email": "test@gmail.com",
+          "Gender": "Male",
+          "DOB": "1999-11-25",
+          "password": "Admin@123"
+        }
+      );
+      expect(response.body["code"]).toBe("200");
+    });
+
+    it("register student with same email", async () => {
+      const response = await request(app).post("/student/register").send(
+        {
+          "Name": "test Bhai",
+          "Email": "test@gmail.com",
+          "Gender": "Male",
+          "DOB": "1999-11-25",
+          "password": "Admin@123"
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+      expect(response.body["message"]).toEqual('Student already registered');
+    })
+
+    //test case for register student without email
+
+    it("register student without email", async () => {
+      const response = await request(app).post("/student/register").send(
+        {
+          "Name": "test Bhai",
+          "Gender": "Male",
+          "DOB": "1999-11-25",
+          "password": "Admin@123"
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+      expect(response.body["data"]["errors"]["Email"]["message"]).toEqual('Path `Email` is required.');
+    })
+
+
+  });
+
+
+  describe('POST /sign-in', () => {
+    it('should return a JWT token when the correct email and password are provided', async () => {
+      const response = await request(app)
+        .post('/student/sign_in')
+        .send({ Email: 'test@gmail.com', Password: 'Admin@123' });
+      expect(response.statusCode).toBe(200);
+      expect(response.body["data"][0]).toHaveProperty('Token');
+    });
+
+    it('should return a 500 error when an incorrect Password is provided', async () => {
+      const response = await request(app)
+        .post('/student/sign_in')
+        .send({ Email: 'test@gmail.com', Password: 'Adminn@1234' });
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["message"]).toEqual('Authentication failed. Invalid user or password.');
+    });
+
+    it('should return a 500 error when an incorrect Email is provided', async () => {
+      const response = await request(app)
+        .post('/student/sign_in')
+        .send({ Email: 'test123@gmail.com', Password: 'Admin@123' });
+
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["message"]).toEqual('Authentication failed. Invalid user or password.');
+    });
+  });
+
+
+});
