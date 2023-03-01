@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 const app = require("../app");
 
-beforeEach(async () => {
+beforeAll(async () => {
   await mongoose.connect("mongodb://localhost:27017/attendanceTestCase");
 });
 
 // // /* Dropping the database and closing connection after each test. */
-afterEach(async () => {
-  // await mongoose.connection.dropDatabase();
+afterAll (async () => {
+  await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
 });
 
@@ -99,5 +99,34 @@ describe("Student Test case", () => {
     });
   });
 
+  describe("leaveApplication", () => {
+    it("leaveApplication ", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "studentId": "63edf9c867f386077a512a2a",
+          "leaveType": "Leave",
+          "leaveFrom": "2023-02-17",
+          "leaveTo": "2023-02-19",
+          "reason": "holiday"
+      }
+      );
+      expect(response.body["code"]).toBe("200");
+      expect(response.body["flag"]).toBe(true);
+    });
+
+    it("leaveApplication without studentId", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "leaveType": "Leave",
+          "leaveFrom": "2023-02-17",
+          "leaveTo": "2023-02-19",
+          "reason": "holiday"
+      }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+    } );
+
+  });
 
 });

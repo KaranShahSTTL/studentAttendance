@@ -170,15 +170,18 @@ class Students {
             status: "Pending",
 
         })
-        console.log('leaveApplication', leaveApplication)
-        try {
-            leaveApplication.save();
-            let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, '', leaveApplication);
-            return res.send(data);
-        } catch (err) {
-            let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.FAIL, err);
-            return res.send(data);
-        }
+
+        leaveApplication.save((err, leave) => {
+            if (err) {
+                let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.FAIL, 'Student already registered', (err));
+                return res.send(data);
+
+            } else {
+                leave.hash_password = undefined;
+                let data = Response(Constants.RESULT_CODE.OK, Constants.RESULT_FLAG.SUCCESS, 'Student registered', (leave));
+                return res.send(data);
+            }
+        });
     })
 
     static leaveApplicationById = asyncWrapper(async (req, res) => {
