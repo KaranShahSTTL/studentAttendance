@@ -122,9 +122,11 @@ class Students {
         const date = new Date();
         const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
         const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 2);
-
-        console.log('firstDay', firstDay)
-        console.log('lastDay', lastDay)
+        console.log("studentId", studentId)
+        if (!studentId) {
+            let data = Response(Constants.RESULT_CODE.ERROR, Constants.RESULT_FLAG.ERROR, 'Student Id is required', '');
+            return res.send(data);
+        }
         Attendance.aggregate([
             {
                 $match: {

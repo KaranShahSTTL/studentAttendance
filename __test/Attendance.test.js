@@ -7,7 +7,7 @@ beforeAll(async () => {
 });
 
 // // /* Dropping the database and closing connection after each test. */
-afterAll (async () => {
+afterAll(async () => {
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
 });
@@ -108,7 +108,7 @@ describe("Student Test case", () => {
           "leaveFrom": "2023-02-17",
           "leaveTo": "2023-02-19",
           "reason": "holiday"
-      }
+        }
       );
       expect(response.body["code"]).toBe("200");
       expect(response.body["flag"]).toBe(true);
@@ -121,12 +121,72 @@ describe("Student Test case", () => {
           "leaveFrom": "2023-02-17",
           "leaveTo": "2023-02-19",
           "reason": "holiday"
-      }
+        }
       );
       expect(response.body["code"]).toBe("500");
       expect(response.body["flag"]).toBe(false);
-    } );
+    });
 
+    it("leaveApplication without leaveType", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "studentId": "63edf9c867f386077a512a2a",
+          "leaveFrom": "2023-02-17",
+          "leaveTo": "2023-02-19",
+          "reason": "holiday"
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+    });
+
+    it("leaveApplication without leaveFrom", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "studentId": "63edf9c867f386077a512a2a",
+          "leaveType": "Leave",
+          "leaveTo": "2023-02-19",
+          "reason": "holiday"
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+    });
+
+    it("leaveApplication without leaveTo", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "studentId": "63edf9c867f386077a512a2a",
+          "leaveType": "Leave",
+          "leaveFrom": "2023-02-17",
+          "reason": "holiday"
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+    });
+
+    it("leaveApplication without reason", async () => {
+      const response = await request(app).post("/student/leaveApplication").send(
+        {
+          "studentId": "63edf9c867f386077a512a2a",
+          "leaveType": "Leave",
+          "leaveFrom": "2023-02-17",
+          "leaveTo": "2023-02-19",
+        }
+      );
+      expect(response.body["code"]).toBe("500");
+      expect(response.body["flag"]).toBe(false);
+    });
+
+  });
+
+  describe("monthSummary", () => {
+    it("monthSummary ", async () => {
+      const response = await request(app).get("/student/monthSummary/63edf5c63fc34460ceefe1c5")
+      expect(response.body["code"]).toBe("200");
+      expect(response.body["flag"]).toBe(true);
+    });
   });
 
 });
